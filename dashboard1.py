@@ -5,6 +5,23 @@ import odoorpc  # type: ignore # For Odoo connection
 
 def dashboard1():
     st.title("Connect to odoo ERP Data")
+
+# Add a title and a description on the main page
+st.title("Welcome to the Odoo ERP Data Connection Page ! Connect now you erp and excel your business")
+st.write("This application allows you to connect to your Odoo ERP system via Odoo External Api OdooRPC wich is a powerful python librery connector to fetch your desired data , choose your data and attributes and visualize your data statistic and dashboards. OdooRPC is a Python module providing an easy way to pilot your Odoo servers through RPC.Features supported:access to all data model methods (even browse) with an API similar to the server-side API, use named parameters with model methods,user context automatically sent providing support for internationalization")
+      
+
+# Add placeholders for images
+col1, col2 = st.columns(2)
+with col1:
+    st.image("/home/rannia/Projects/tacticlogo.png", width=130)  # Replace with the path to your image
+with col2:
+    st.image("/home/rannia/Projects/odoo.png", width=150)  # Replace with the path to your image
+
+
+
+
+
 # --- Odoo Connection ---
 st.sidebar.header("Odoo Connection")
 odoo_url = st.sidebar.text_input("Odoo URL", "127.0.0.1")  # Default to localhost IP
@@ -65,21 +82,55 @@ domain = []  # Optional: Add domain filters here (e.g., [('state', '=', 'sale')]
 limit = st.number_input("Limit (0 for no limit):", min_value=0, value=1000)
 
 
+# Model and fields input
+model_name = st.sidebar.text_input("Model Name", "sale.order")  # Default to 'sale.order'
+fields_to_fetch = st.sidebar.text_input("Fields to Fetch", "name,date_order,amount_total,state")  # Comma-separated
+
+# Button to fetch data
 if st.button("Fetch Data"):
-        try:
-            records = odoo.env[model_name].search_read(domain, fields_to_fetch, limit=limit)
-            df = pd.DataFrame(records)
+    try:
+        # Convert comma-separated fields to a list
+        fields_list = fields_to_fetch.split(",")
 
-            # Display the fetched data
-            st.write(df)
+        # Connect to Odoo
+        odoo = odoorpc.ODOO(odoo_url, port=odoo_port)
+        odoo.login(odoo_db, odoo_user, odoo_password)
 
-            # --- Data Filtering and Exploration ---
-            # Example: Sales by Category (Replace "Sales" and "Category" with relevant fields)
-            if "Sales" in df.columns and "Category" in df.columns:
-                category_df = df.groupby(by=["Category"], as_index=False)["Sales"].sum()
-                st.subheader("Sales by Category")
-                fig = px.bar(category_df, x="Category", y="Sales")
-                st.plotly_chart(fig)
+        # Fetch records
+        records = odoo.env[model_name].search_read([], fields_list)
+        df = pd.DataFrame(records)
 
-        except Exception as e:
-            st.error(f"Error fetching data: {e}")
+        # Display the fetched data
+        st.write(df)
+
+        # --- Data Filtering and Exploration ---
+        if df.empty:
+            st.warning("No data fetched.")
+        else:
+            numeric_columns = df.select_dtypes(include=['number']).columns
+            categorical_columns = df.select_dtypes(include=['object']).columns
+
+            if len(numeric_columns) > 0 and len(categorical_columns) > 0:
+                st.subheader("Data Visualizations")
+
+                # Visualize numeric and categorical data
+                for num_col in numeric_columns:
+                    for cat_col in categorical_columns:
+                        grouped_df = df.groupby(by=[cat_col], as_index=False)[num_col].sum()
+                        st.subheader(f"{num_col} by {cat_col}")
+                        fig = px.bar(grouped_df, x=cat_col, y=num_col, title=f"{num_col} by {cat_col}")
+                        st.plotly_chart(fig)
+
+                # Additional visualizations
+                st.subheader("Numeric Data Distribution")
+                for col in numeric_columns:
+                    fig = px.histogram(df, x=col, title=f"Distribution of {col}")
+                    st.plotly_chart(fig)
+                
+                st.subheader("Category Counts")
+                for col in categorical_columns:
+                    fig = px.histogram(df, x=col, title=f"Counts of {col}")
+                    st.plotly_chart(fig)
+
+    except Exception as e:
+        st.error(f"Error fetching data: {e}")

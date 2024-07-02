@@ -7,7 +7,7 @@ warnings.filterwarnings('ignore')
 
 def dashboard():
     st.title("Upload CSV File Analytics Page")
-st.title(" :bar_chart: Welcome To Our Tac-Tic Dashboard Analytics")
+st.title(" :bar_chart: Welcome To Tac-Tic Dashboard Samrt Analytics")
 st.markdown('<style>div.block-container{padding-top:1.8srem;}</style>',unsafe_allow_html=True)
 
 fl = st.file_uploader(":file_folder: Upload a file",type=(["csv","txt","xlsx","xls"]))
@@ -34,6 +34,9 @@ with col2:
     date2 = pd.to_datetime(st.date_input("End Date", endDate))
 
 df = df[(df["Order Date"] >= date1) & (df["Order Date"] <= date2)].copy()
+
+# Add an image to the sidebar
+st.sidebar.image("/home/rannia/Projects/tacticlogo.png", width=150, use_column_width=True)
 
 st.sidebar.header("Choose your filter: ")
 # Create for Region

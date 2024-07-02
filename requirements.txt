@@ -1,0 +1,5 @@
+streamlit==1.15.2
+plotly==5.10.0
+pandas==1.5.2
+odoorpc==0.7.0
+prometheus_client==0.14.1

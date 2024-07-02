@@ -5,4 +5,4 @@ prometheus_client==0.14.1
 pandas==1.5.3
 numpy==1.21.6
 pytest  # Add pytest here
-altair
+altair==4.1.0  

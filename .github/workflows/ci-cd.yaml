@@ -14,10 +14,10 @@ jobs:
 
     steps:
       - name: Checkout code
-        uses: actions/checkout@v2
+        uses: actions/checkout@v3
 
       - name: Set up Python
-        uses: actions/setup-python@v2
+        uses: actions/setup-python@v4
         with:
           python-version: '3.10'  # Replace with your Python version
 
@@ -28,7 +28,9 @@ jobs:
 
       - name: Run tests
         run: |
-          pytest  # Adjust based on your test setup
+          pytest
+        env:
+          LD_LIBRARY_PATH: /opt/hostedtoolcache/Python/3.10.14/x64/lib
 
   deploy:
     runs-on: ubuntu-latest
@@ -36,10 +38,10 @@ jobs:
 
     steps:
       - name: Checkout code
-        uses: actions/checkout@v2
+        uses: actions/checkout@v3
 
       - name: Set up Python
-        uses: actions/setup-python@v2
+        uses: actions/setup-python@v4
         with:
           python-version: '3.10'  # Replace with your Python version
 
@@ -50,4 +52,10 @@ jobs:
 
       - name: Deploy to Streamlit
         run: |
-          streamlit run dashboard.py  # Adjust based on your script
+          streamlit run dashboard1.py  # Adjust based on your script
+        env:
+          ODOO_URL: ${{ secrets.ODOO_URL }}
+          ODOO_DB: ${{ secrets.ODOO_DB }}
+          ODOO_USER: ${{ secrets.ODOO_USER }}
+          ODOO_PASSWORD: ${{ secrets.ODOO_PASSWORD }}
+
